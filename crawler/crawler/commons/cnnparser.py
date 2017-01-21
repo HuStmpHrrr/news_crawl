@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from crawler.commons import structure
 from bs4 import BeautifulSoup
 import urlparse
@@ -18,7 +19,7 @@ def _normal_parser(response):
         if len(authors) and authors[-1] == 'CNN':
             authors.pop()
         if len(authors):
-            authors = authors + authors[-1].split(" and ")
+            authors = authors + authors.pop().split(" and ")
         return authors
 
     title = response.css(r'h1.pg-headline::text').extract_first()
@@ -43,7 +44,7 @@ def _normal_parser(response):
         return ''.join(unicode(p) for p in para.contents)
 
     def _extract_image(para):
-        return (para.select_one('img.media__image')['src'],
+        return (para.select_one('img.media__image')['data-src-medium'],
                 para.select_one('.media__caption div').string)
 
     def _extract_sections(para):
@@ -55,7 +56,7 @@ def _normal_parser(response):
                 try:
                     structs.append(structure.Image(*_extract_image(content)))
                 except:
-                    logging.warning("failed to parse this elem: {}".format(content))
+                    logging.warning("failed to parse this elem from {}: {}".format(response.url, content))
                     pass
         return structs
 
@@ -85,7 +86,7 @@ def to_structure(response):
 
 def extract_content_model(response):
     """
-    this is very hacky. CNN mainpages are not static so it's a big tricky
+    this is very hacky. CNN mainpages are not static so it's a bit tricky
     """
     scripts = [s.css('::text').extract_first() for s in response.css('script')]
     content_scripts = [i for i in scripts if i is not None
