@@ -1,3 +1,3 @@
 #!/bin/bash
 
-pip install scrapy macropy
+pip install scrapy bs4
