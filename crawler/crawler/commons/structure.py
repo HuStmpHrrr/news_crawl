@@ -37,3 +37,6 @@ class Highlights(Structure, namedtuple('Highlights', 'items')):
 
 class Article(Structure, namedtuple('Article', 'title, orig, authors, date, highlights, structures')):
     pass
+
+
+Content = namedtuple("Content", 'description, duration, headline, thumbnail, uri')

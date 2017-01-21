@@ -2,6 +2,7 @@ from crawler.commons import structure
 from bs4 import BeautifulSoup
 import urlparse
 import logging
+import demjson
 
 
 para_class = 'zn-body__paragraph'
@@ -67,6 +68,7 @@ def _normal_parser(response):
     return structure.Article(title, response.url, authors, date, hl, structures)
 
 
+# TODO: the same idea as above. don't want to spend time on checking out HTML structure
 def _money_parser(response):
     pass
 
@@ -79,3 +81,31 @@ def to_structure(response):
         return _money_parser(response)
     else:
         return None
+
+
+def extract_content_model(response):
+    """
+    this is very hacky. CNN mainpages are not static so it's a big tricky
+    """
+    scripts = [s.css('::text').extract_first() for s in response.css('script')]
+    content_scripts = [i for i in scripts if i is not None
+                       and i.startswith('var')
+                       and 'contentModel' in i]
+    try:
+        content_script = content_scripts[0]
+        jsobj = content_script.split('=', 2)[2].strip()
+        jsobj = jsobj[:-1] if jsobj[-1] == ';' else jsobj
+        content_model = demjson.decode(jsobj)
+        contents = []
+        for content in filter(lambda s: 'uri' in s and not s['uri'].startswith('/videos'),
+                              content_model['siblings']['articleList']):
+            try:
+                fields = [content[k] for k in structure.Content._fields[:4]]
+                fields.append(response.urljoin(content['uri']))
+                contents.append(structure.Content(*fields))
+            except Exception as e:
+                logging.error(e)
+        return contents
+    except:
+        logging.warning("response from {} cannot be analyzed.".format(response.url))
+        return []

@@ -1,3 +1,5 @@
+from crawler.commons import cnnparser, structure
+
 def relates_to(article, predicate):
     """
     predicate takes a string and return a boolean
