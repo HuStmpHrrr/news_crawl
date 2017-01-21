@@ -10,10 +10,9 @@ import json
 
 
 class Target(object):
-    def __init__(self, name, predicate, limit):
+    def __init__(self, name, predicate):
         self._name = name
         self._predicate = predicate
-        self._limit = limit
         self._cnt = 0
 
     @property
@@ -21,12 +20,8 @@ class Target(object):
         return self._cnt
 
     def inc(self):
-        if not self.is_done: self._cnt += 1
+        self._cnt += 1
         return self._cnt
-
-    @property
-    def is_done(self):
-        return self._cnt >= self._limit
 
     @property
     def predicate(self):
@@ -38,8 +33,8 @@ class CnnSpider(scrapy.Spider):
     start_urls = ['http://www.cnn.com']
 
     targets = {
-        'Trump': Target("Trump", lambda s: 'Trump' in s, 25),
-        'Clinton': Target("Clinton", lambda s: 'Clinton' in s, 25)
+        'Trump': Target("Trump", lambda s: 'Trump' in s),
+        'Clinton': Target("Clinton", lambda s: 'Clinton' in s)
     }
 
     today = datetime.date.today()
@@ -69,12 +64,14 @@ class CnnSpider(scrapy.Spider):
         except:
             return False
 
-    @property
-    def should_stop(self):
-        return all(t.is_done for t in self.targets.values())
+    def relates_to(self, article, target_track):
+        return commons.relates_to(article, target_track.predicate)
 
     def parse(self, response):
-        if self.should_stop: return
+        """
+        this is the main entrance of the crawler, i try to avoid too deep recursion
+        on sub mainpages.
+        """
         for href in response.xpath('//a/@href').extract():
             if href.startswith('/') and not href.startswith('/video'):
                 nex = response.urljoin(href)
@@ -85,6 +82,9 @@ class CnnSpider(scrapy.Spider):
             yield req
 
     def news_crawler(self, response):
+        """
+        this crawls news from the mainpages
+        """
         stories = commons.cnnparser.extract_content_model(response)
         for story in stories:
             if self.should_crawl(story.uri):
@@ -92,12 +92,16 @@ class CnnSpider(scrapy.Spider):
                 yield scrapy.Request(story.uri, self.news_parse)
 
     def news_parse(self, response):
+        """
+        this crawls the news content
+        """
         article = commons.cnnparser.to_structure(response)
+        if article is None: return
         for (targ, track) in self.targets.items():
-            if not track.is_done and commons.relates_to(article, track.predicate):
+            if self.relates_to(article, track):
                 track.inc()
                 articled = article.todict()
                 with open(os.path.join(self._target_folder, targ + '.jsonl'), 'a') as fd:
                     json.dump(articled, fd, separators=(',',':'))
                     fd.write('\n')
-                print targ, track.cnt, article.orig
+                logging.info('{}, {}, {}'.format(targ, track.cnt, article.orig))
