@@ -1,5 +1,9 @@
 from collections import namedtuple
 
+"""
+this file defines the data models to represent news articles, meta data to fetch articles,
+and meta data to generate webpages.
+"""
 
 class Structure(object):
     def todict(self):

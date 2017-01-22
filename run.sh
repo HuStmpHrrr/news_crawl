@@ -52,7 +52,7 @@ twistd -n web -p 8000 --path "$OUTPUT`[ -f "$OUTPUT/index.html" ] && echo /index
 HTTP_SERVER=$!
 
 cd "$DIR/crawler"
-scrapy crawl "$TARGET" --logfile "$OUTPUT/crawler.log" -s OUTPUT_FOLDER="$OUTPUT" JOBDIR="$OUTPUT"
+scrapy crawl "$TARGET" --logfile "$OUTPUT/crawler.log" -s OUTPUT_FOLDER="$OUTPUT" -s JOBDIR="$OUTPUT"
 
 python "$DIR/"template.py "$OUTPUT" "$TARGET"
 

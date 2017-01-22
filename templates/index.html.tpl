@@ -76,7 +76,9 @@
 			$('[data-toggle="popover"]').popover();   
 	});
 	</script>
-  <!-- load previews -->
+  <!-- load previews
+       previews are loaded once topics are clicked, and then will be cached.
+  -->
   <script>
   preview_cache = {}
   $(function() {
@@ -87,19 +89,25 @@
       var target = $(e.target);
       $('#newsTitle').text(target.text());
 
+
       // then we will need to load the preview html into the content
       var req = target.attr("fetch-source");
-      $.ajax(req, {
-        error: function (jqxhr, tstatus, error) {
-          console.error("error sending " + req + ": " + error)
-          $('#preview').append('<div class="alert alert-warning">' + 
-            'failed to load from ' + req + ', error message:<br/>' +
-             escape(error) + '</div>')
-        },
-        success: function (data, tstatus, jqxhr) {
-          $('#preview').append(data)
-        }
-      })
+      if (req in preview_cache) {
+        $('#preview').append(preview_cache[req])
+      } else {
+        $.ajax(req, {
+          error: function (jqxhr, tstatus, error) {
+            console.error("error sending " + req + ": " + error)
+            $('#preview').append('<div class="alert alert-warning">' + 
+              'failed to load from ' + req + ', error message:<br/>' +
+               escape(error) + '</div>')
+          },
+          success: function (data, tstatus, jqxhr) {
+            $('#preview').append(data)
+            preview_cache[req] = data
+          }
+        })
+      }
     })
   })
   </script>
