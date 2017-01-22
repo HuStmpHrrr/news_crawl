@@ -34,11 +34,12 @@ class CnnSpider(scrapy.Spider):
 
     targets = {
         'Trump': Target("Trump", lambda s: 'Trump' in s),
-        'Clinton': Target("Clinton", lambda s: 'Clinton' in s)
+        'Clinton': Target("Clinton", lambda s: 'Clinton' in s),
+        'Obama': Target("Obama", lambda s: 'Obama' in s)
     }
 
     today = datetime.date.today()
-    limit = today - datetime.timedelta(days=1)
+    limit = today - datetime.timedelta(days=3)
 
     def __init__(self, output_folder=None):
         self._output_folder = '.' if output_folder is None else output_folder

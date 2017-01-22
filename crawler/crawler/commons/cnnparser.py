@@ -4,18 +4,7 @@ from bs4 import BeautifulSoup
 import urlparse
 import logging
 import demjson
-
-_html_escape_table = {
-    "&": "&amp;",
-    '"': "&quot;",
-    "'": "&apos;",
-    ">": "&gt;",
-    "<": "&lt;",
-    }
-
-def html_escape(text):
-    """Produce entities within text."""
-    return "".join(_html_escape_table.get(c, c) for c in text)
+from datarepr import html_escape
 
 
 para_class = 'zn-body__paragraph'

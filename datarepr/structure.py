@@ -69,4 +69,4 @@ def fromdict(d):
 Content = namedtuple("Content", 'description, duration, headline, thumbnail, uri')
 
 
-NewsItem = namedtuple("NewsItem", 'title, date, hightlights, location')
+NewsItem = namedtuple("NewsItem", 'title, date, highlights, location')

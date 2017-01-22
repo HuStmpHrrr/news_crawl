@@ -8,6 +8,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/assets/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/custom.css">
   <script src="/assets/jquery.min.js"></script>
   <script src="/assets/bootstrap.min.js"></script>
 </head>
@@ -39,9 +40,7 @@
           <ul class="nav nav-pills nav-stacked">
           @for news in targets[t]:
             <li title="<b>Story highlights</b>" data-toggle="popover" data-trigger="hover"
-							  data-content="<ol>@for item in news.hightlights.items():
-                  <li>@item</li>\
-                  @end</ol>">
+                data-html="true" data-content="@news.highlights">
               <button type="button" class="btn btn-info btn-lg load-preview" data-toggle="modal"
                       data-target="#newModal" fetch-source="@news.location">@news.title</button>
             </li>

@@ -5,7 +5,7 @@ from wheezy.template.ext.core import CoreExtension
 import sys
 import os
 from datetime import datetime
-from datarepr import structure
+from datarepr import structure, html_escape
 import json
 import pytz
 import calendar
@@ -22,14 +22,13 @@ def render(template, context):
 
 
 def render_to(f, template, context):
-    print f, template, context
     with io.open(f, 'w') as fd:
         fd.write(render(template, context))
 
 
 """ this is sad, CNN doesn't use standard timezone format """
 _known_tz = {
-    'ET': pytz.timezone("US/Eastern")
+    'ET': pytz.timezone('US/Eastern')
 }
 
 
@@ -55,7 +54,7 @@ def parse_time(s):
     day = int(elems[6][:-1])
     year = int(elems[7])
 
-    return datetime(year, mon, day, hour, minute, 0, tzinfo=loc)
+    return loc.localize(datetime(year, mon, day, hour, minute, 0))
 
 
 def save_preview(article, folder):
@@ -112,9 +111,11 @@ if __name__ == '__main__':
 
         items = []
         for article in articles:
-            preview = 'previews/' + save_preview(article, prevf)
+            preview = '/previews/' + save_preview(article, prevf)
             time = parse_time(article.date)
-            items.append(structure.NewsItem(article.title, time, article.highlights, preview))
+            hl = '<ul>{}</ul>'.format(''.join('<li>{}</li>'.format(html_escape(i))
+                                              for i in article.highlights.items))
+            items.append(structure.NewsItem(article.title, time, hl, preview))
         targets[t] = items
 
     context = { 'targets': targets, 'source': source }
