@@ -46,6 +46,7 @@ echo "${PORT:?port must be specified.}" > /dev/null
 echo "${TARGET:?target must be specified.}" >/dev/null
 mkdir -p "${OUTPUT:?output folder must be specified.}"
 
+cp -r "$DIR"/templates/* "$OUTPUT"
 
 twistd -n web -p 8000 --path "$OUTPUT`[ -f "$OUTPUT/index.html" ] && echo /index.html`" &
 HTTP_SERVER=$!

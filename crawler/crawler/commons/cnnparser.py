@@ -5,6 +5,18 @@ import urlparse
 import logging
 import demjson
 
+_html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+    }
+
+def html_escape(text):
+    """Produce entities within text."""
+    return "".join(_html_escape_table.get(c, c) for c in text)
+
 
 para_class = 'zn-body__paragraph'
 
@@ -33,15 +45,16 @@ def _normal_parser(response):
 
     cite = body.css('div.el__leafmedia--sourced-paragraph>p.zn-body__paragraph')
     if len(cite):
-        source = cite.css('cite::text').extract_first()
-        quote = cite.css('::text').extract_first()
+        source = html_escape(cite.css('cite::text').extract_first())
+        quote = html_escape(cite.css('::text').extract_first())
         structures.append(structure.Citation(source, quote))
 
     soup = BeautifulSoup(body.css('.l-container').extract_first(), 'html.parser')
     paragraphs = soup.select('div.l-container > [class^=zn]')
 
     def _extract_paragraph(para):
-        return ''.join(unicode(p) for p in para.contents)
+        return ''.join(unicode(p) if not isinstance(p, unicode)
+                       else html_escape(p) for p in para.contents)
 
     def _extract_image(para):
         return (para.select_one('img.media__image')['data-src-medium'],

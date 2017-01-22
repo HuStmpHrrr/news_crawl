@@ -57,13 +57,16 @@ _structure_classes = { t.__name__: t
                         and t is not Structure
                       }
 
-def from_dict(d):
+def fromdict(d):
     def convert(e):
         return map(convert, e) if isinstance(e, list) else \
-               from_dict(e) if isinstance(e, dict) else \
+               fromdict(e) if isinstance(e, dict) and 'type' in e else \
                e
     clz = _structure_classes[d['type']]
     return clz(**{ f: convert(d[f]) for f in clz._fields })
 
 
 Content = namedtuple("Content", 'description, duration, headline, thumbnail, uri')
+
+
+NewsItem = namedtuple("NewsItem", 'title, date, hightlights, location')
