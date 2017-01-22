@@ -11,9 +11,9 @@ $ ./bin_deps.sh
 ```
 
 to setup binary dependencies. If OS is not Debian derived, change `INSTALLER` variable in the script, and this
-hopefully should work. If OS is windows, good luck.
+hopefully should work. If OS is windows, good luck, binary depedencies need to be resolved by hand.
 
-Run
+Then run
 
 ```
 $ ./py_deps.sh

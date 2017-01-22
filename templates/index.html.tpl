@@ -1,6 +1,7 @@
 @require(targets, source)
 @# targets: the targets specified in the spider(s)
 @# source : the news source, CNN for example
+@# vim: ft=html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,6 +97,7 @@
         $('#preview').append(preview_cache[req])
       } else {
         $.ajax(req, {
+          dataType: "text",
           error: function (jqxhr, tstatus, error) {
             console.error("error sending " + req + ": " + error)
             $('#preview').append('<div class="alert alert-warning">' + 
