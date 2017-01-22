@@ -52,16 +52,16 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog" style="width:80%">
+  <div class="modal fade" id="newModal" role="dialog">
+    <div class="modal-dialog" style="width:60%">
     
       <!-- Modal content-->
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h2 class="modal-title news-header"></h2>
+          <h2 class="modal-title" id="newsTitle"></h2>
         </div>
-        <div class="modal-body news-body">
+        <div class="modal-body panel panel-body" id="preview">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -76,5 +76,32 @@
 			$('[data-toggle="popover"]').popover();   
 	});
 	</script>
+  <!-- load previews -->
+  <script>
+  preview_cache = {}
+  $(function() {
+    console.log("registering preview loading event")
+    $('.load-preview').click(function (e) {
+      $('#preview').empty(); // we first clear out the previous content
+
+      var target = $(e.target);
+      $('#newsTitle').text(target.text());
+
+      // then we will need to load the preview html into the content
+      var req = target.attr("fetch-source");
+      $.ajax(req, {
+        error: function (jqxhr, tstatus, error) {
+          console.error("error sending " + req + ": " + error)
+          $('#preview').append('<div class="alert alert-warning">' + 
+            'failed to load from ' + req + ', error message:<br/>' +
+             escape(error) + '</div>')
+        },
+        success: function (data, tstatus, jqxhr) {
+          $('#preview').append(data)
+        }
+      })
+    })
+  })
+  </script>
 </body>
 </html>

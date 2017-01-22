@@ -35,7 +35,7 @@ def _normal_parser(response):
     cite = body.css('div.el__leafmedia--sourced-paragraph>p.zn-body__paragraph')
     if len(cite):
         source = html_escape(cite.css('cite::text').extract_first())
-        quote = html_escape(cite.css('::text').extract_first())
+        quote = html_escape(cite.css('p::text').extract_first())
         structures.append(structure.Citation(source, quote))
 
     soup = BeautifulSoup(body.css('.l-container').extract_first(), 'html.parser')

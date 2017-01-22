@@ -68,17 +68,18 @@ def save_preview(article, folder):
         string interpolation
         """
         return '<div class="paragraph">{}</div>'.format(s.content) if isinstance(s, structure.Paragraph) \
-            else '<div class="paragraph">{} - {}</div>'.format(s.source, s.quote)
+            else '<div class="paragraph"><b>{} -</b> {}</div>'.format(s.source, s.quote) if isinstance(s, structure.Citation) \
+            else ''.join(_to_paragraph(t) for t in s.structures) if isinstance(s, structure.Section) \
+            else ''
 
     fmt = '%Y-%m-%d %H:%M:%S %Z%z'
-    meta = '<div class="meta">By {}, At {}</div>'.format(', '.join(article.authors),
-                                                         parse_time(article.date).strftime(fmt))
+    meta = '<div class="meta paragraph">By {}, At {}</div>'.format(', '.join(article.authors),
+                                                                   parse_time(article.date).strftime(fmt))
 
-    orig_link = '<div class="alert alert-info"><a href="{}">Click here to view original article</a></div>'.format(
-        article.orig)
+    orig_link = '<div class="alert alert-info">' + \
+        '<a href="{}" target="_blank">Click here to view original article</a></div>'.format(article.orig)
 
-    body = ''.join(_to_paragraph(s) for s in article.structures
-                   if isinstance(s, structure.Paragraph) or isinstance(s, structure.Citation))
+    body = ''.join(_to_paragraph(s) for s in article.structures)
 
     with io.open(os.path.join(folder, save_file), 'w') as fd:
         fd.write(meta + orig_link + body)
@@ -116,7 +117,8 @@ if __name__ == '__main__':
             hl = '<ul>{}</ul>'.format(''.join('<li>{}</li>'.format(html_escape(i))
                                               for i in article.highlights.items))
             items.append(structure.NewsItem(article.title, time, hl, preview))
-        targets[t] = items
+
+        targets[t] = sorted(items, key=lambda i: i.date, reverse=True)[:25]
 
     context = { 'targets': targets, 'source': source }
     render_to(outputf, template, context)
